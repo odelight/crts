@@ -21,15 +21,19 @@ public class NetworkedQueue<T extends Serializable> {
 		
 	}
 	
-	public void pushFrame(T frame2){
-		
+	public void pushFrame(T frame){
+		FrameWrapper wrapped = new FrameWrapper(frame);
 	}
 
 	public T pollFrame(){
 		return null;
 	}
 	
-	private static class FrameWrapper<T>{
+	private class FrameWrapper{
 		private long pushedTimestamp;
+		private T innerFrame;
+		public FrameWrapper(T frame){
+			innerFrame = frame;
+		}
 	}
 }
