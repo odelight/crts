@@ -29,5 +29,7 @@ public class NetworkedQueue<T extends Serializable> {
 		return null;
 	}
 	
-	
+	private static class FrameWrapper<T>{
+		private long pushedTimestamp;
+	}
 }
