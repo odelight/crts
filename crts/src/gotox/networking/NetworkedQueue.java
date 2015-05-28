@@ -21,6 +21,10 @@ public class NetworkedQueue<T extends Serializable> {
 		
 	}
 	
+	public NetworkedQueue(OutputStream out, InputStream in) {
+		
+	}
+
 	public void pushFrame(T frame){
 		FrameWrapper wrapped = new FrameWrapper(frame);
 	}

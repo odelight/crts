@@ -7,9 +7,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +14,7 @@ import java.util.Map;
 import javax.swing.JPanel;
 
 public class MapDisplay extends JPanel implements RedrawListener {
+	private static final long serialVersionUID = 1L;
 	private final Dimension mapDimension;
 	private final BufferedImage image;
 	private final ImmutableMap map;
