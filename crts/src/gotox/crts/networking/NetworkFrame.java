@@ -1,4 +1,4 @@
-package gotox.crts.network;
+package gotox.crts.networking;
 
 import java.io.Serializable;
 
