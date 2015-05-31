@@ -1,7 +1,14 @@
 package gotox.crts;
 
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowStateListener;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import gotox.crts.controller.Action;
 import gotox.crts.controller.InputReader;
 import gotox.crts.controller.Player;
 import gotox.crts.model.ImmutableMap;
@@ -13,6 +20,8 @@ import javax.swing.JFrame;
 public class Game extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+	private volatile boolean isRunning;
+	private InputReader ir;
 
 	public Game() {
 		init();
@@ -26,20 +35,33 @@ public class Game extends JFrame {
 		ImmutableMap iMap = new ImmutableMap(map);
 		
 		MapDisplay md = new MapDisplay(iMap);
-		InputReader ir = new InputReader(map, new Player());
-		ir.registerRedrawListener(md);
+		ir = new InputReader( new Player());	
 		
 		add(md);
 	    addMouseMotionListener(ir);
 		setSize(width, height);
 		setTitle("C.R.T.S.");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addWindowListener(new WindowAdapter(){
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				isRunning = false;
+			}
+		});
 		setLocationRelativeTo(null);
+	}
+	
+	private void gameLoop(){
+		isRunning = true;
+		while (isRunning){
+			List<Action> inputs = ir.getActions();
+		}
 	}
 
 	public static void main(String[] args) {
 		Game g = new Game();
 		g.setVisible(true);
+		g.gameLoop();
 	}
 
 }
