@@ -6,6 +6,8 @@ import gotox.networking.NetworkedQueue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -29,7 +31,7 @@ public class Network {
 			    OutputStream out = clientSocket.getOutputStream();
 			    InputStream in = clientSocket.getInputStream();
 			) {
-			frameQueue = new NetworkedQueue<NetworkFrame>(out, in);
+			frameQueue = new NetworkedQueue<NetworkFrame>(new ObjectOutputStream(out), new ObjectInputStream(in));
 		}
 		
 	}
@@ -39,7 +41,7 @@ public class Network {
 			    OutputStream out = clientSocket.getOutputStream();
 			    InputStream in = clientSocket.getInputStream();
 			)	{
-			frameQueue = new NetworkedQueue<NetworkFrame>(out, in);
+			frameQueue = new NetworkedQueue<NetworkFrame>(new ObjectOutputStream(out), new ObjectInputStream(in));
 		}
 	}
 	public void queueAction(Action a){
@@ -47,7 +49,7 @@ public class Network {
 		NextFrameActions.add(a);
 		NextFrameAcionsLock.unlock();
 	}
-	private void sendFrameAndScheduleNext(){
+	private void sendFrameAndScheduleNext() throws IOException{
 		NextFrameAcionsLock.lock();
 		List<Action> sendActions = NextFrameActions;
 		NextFrameActions = new ArrayList<>();
