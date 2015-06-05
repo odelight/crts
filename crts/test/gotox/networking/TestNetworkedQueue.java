@@ -13,6 +13,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,11 +43,16 @@ public class TestNetworkedQueue {
 
 	}
 
+	@After
+	public void cleanup(){
+		netQueue.stop();
+		netQueueRemote.stop();
+	}
+	
 	@Test(timeout = 500)
 	public void testSendMsg() throws IOException, ClassNotFoundException {
 		final String test = "yo dawg";
 		netQueue.pushFrame(test);
-//		mockLocalOut.flush();
 		assertEquals(test,
 				((FrameWrapper) mockLocalIn.readObject()).getInnerFrame());
 	}
@@ -65,8 +71,6 @@ public class TestNetworkedQueue {
 		assertTrue(list.contains(msg1));
 		assertTrue(list.contains(msg2));
 		assertEquals(list.size(), 2);
-
-
 	}
 
 }
