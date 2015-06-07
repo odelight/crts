@@ -1,16 +1,13 @@
 package gotox.networking;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Queue of objects of type T('frames') which is synchronized over a network.
@@ -23,35 +20,30 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class NetworkedQueue<T extends Serializable> {
 	private final List<ObjectOutputStream> remoteOut;
-//	private final List<ObjectInputStream> remoteIn;
-	private final List<ReentrantLock> receivedFramesLocks;
-	private final List<List<FrameWrapper<T>>> receivedFrames;
-	private final List<Poller> remoteInPollers;
-	private int lastReceivedFrame = 0;
+	private final List<List<FrameWrapper<T>>> receivedFramesBySource;
+	private final List<FrameWrapper<T>> pushedFrames;
+	private final List<Poller<T>> remoteInPollers;
 	private int lastSentFrame = 0;
 
 	public NetworkedQueue(List<ObjectOutputStream> remoteOut,
 			List<ObjectInputStream> remoteIn) {
 		this.remoteOut = remoteOut;
-//		this.remoteIn = remoteIn;
-		receivedFrames = new ArrayList<>();
-		receivedFramesLocks = new ArrayList<>();
+		receivedFramesBySource = new ArrayList<>();
+		pushedFrames = new ArrayList<>();
+		receivedFramesBySource.add(pushedFrames);
 		remoteInPollers = new ArrayList<>();
 		for (int i = 0; i < remoteIn.size(); i++) {
 			ArrayList<FrameWrapper<T>> receivedFrameList = new ArrayList<>();
-			receivedFrames.add(receivedFrameList);
-			ReentrantLock l = new ReentrantLock();
-			receivedFramesLocks.add(l);
-			Poller<T> poller = new Poller<T>(remoteIn.get(i), receivedFrameList,
-					l);
+			receivedFramesBySource.add(receivedFrameList);
+			Poller<T> poller = new Poller<T>(remoteIn.get(i), receivedFrameList);
 			remoteInPollers.add(poller);
 			Thread t = new Thread(poller);
 			t.start();
 		}
 	}
-	
-	public void stop(){
-		for(Poller p : remoteInPollers){
+
+	public void stop() {
+		for (Poller<T> p : remoteInPollers) {
 			p.kill();
 		}
 	}
@@ -69,35 +61,38 @@ public class NetworkedQueue<T extends Serializable> {
 			out.writeObject(wrapped);
 			out.flush();
 		}
+		synchronized (pushedFrames) {
+			pushedFrames.add(wrapped);
+		}
 	}
 
-	public List<T> pollFrames() throws IOException {
+	public List<T> pollFrames() {
 		List<T> ret = new ArrayList<T>();
 
 		int highestAvailableFrame = Integer.MAX_VALUE;
-		for (int i = 0; i < receivedFrames.size(); i++) {
-			List<FrameWrapper<T>> frameList = receivedFrames.get(i);
+		for (int i = 0; i < receivedFramesBySource.size(); i++) {
+			List<FrameWrapper<T>> frameList = receivedFramesBySource.get(i);
 			if (frameList.size() > 0) {
 				FrameWrapper<T> f = frameList.get(frameList.size() - 1);
 				highestAvailableFrame = Math.min(highestAvailableFrame,
-						f.frameNumber);
+						f.getFrameNumber());
 			} else {
 				return ret;
 			}
 		}
-		for (int i = 0; i < receivedFrames.size(); i++) {
-			List<FrameWrapper<T>> frameList = receivedFrames.get(i);
-			receivedFramesLocks.get(i).lock();
-			while(frameList.size() > 0){
-				FrameWrapper<T> wrapped = frameList.get(0);
-				if(wrapped.frameNumber <= highestAvailableFrame){
-					frameList.remove(0);
-					ret.add(wrapped.innerFrame);
-				} else {
-					break;
+		for (int i = 0; i < receivedFramesBySource.size(); i++) {
+			List<FrameWrapper<T>> frameList = receivedFramesBySource.get(i);
+			synchronized (frameList) {
+				while (frameList.size() > 0) {
+					FrameWrapper<T> wrapped = frameList.get(0);
+					if (wrapped.getFrameNumber() <= highestAvailableFrame) {
+						frameList.remove(0);
+						ret.add(wrapped.innerFrame);
+					} else {
+						break;
+					}
 				}
 			}
-			receivedFramesLocks.get(i).unlock();
 		}
 		return ret;
 	}
@@ -130,35 +125,41 @@ public class NetworkedQueue<T extends Serializable> {
 
 		long getPushedTimestamp() {
 			return pushedTimestamp;
+
 		}
 	}
 
 	static class Poller<S> implements Runnable {
+		private volatile Thread pollerThread;
 		private final ObjectInputStream in;
 		private final List<FrameWrapper<S>> receivedFrames;
-		private final ReentrantLock lock;
 		private boolean running = true;
 
-		public Poller(ObjectInputStream in,
-				List<FrameWrapper<S>> receivedFrames, ReentrantLock lock) {
+		public Poller(ObjectInputStream in, List<FrameWrapper<S>> receivedFrames) {
 			this.in = in;
 			this.receivedFrames = receivedFrames;
-			this.lock = lock;
 		}
 
 		public void kill() {
 			running = false;
+			pollerThread.interrupt();
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void run() {
+			pollerThread = Thread.currentThread();
 			try {
 				while (running) {
 					Object o = in.readObject();
-					lock.lock();
-					receivedFrames.add((FrameWrapper<S>) o);
-					lock.unlock();
+					synchronized (receivedFrames) {
+						receivedFrames.add((FrameWrapper<S>) o);
+					}
 				}
+			} catch (InterruptedIOException e) {
+				//Will get interrupted exception when shutting down.
+				if (running)
+					throw new RuntimeException(e);
 			} catch (ClassNotFoundException | IOException e) {
 				throw new RuntimeException(e);
 			}

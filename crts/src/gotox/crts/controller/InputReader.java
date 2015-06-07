@@ -13,7 +13,7 @@ public class InputReader implements MouseMotionListener, MouseListener {
 	private Point lastMousePosition;
 	private final Player player;
 	private List<Action> actionList = new ArrayList<>();
-	private ReentrantLock actionListLock;
+	private ReentrantLock actionListLock = new ReentrantLock();
 
 	public InputReader(Player p) {
 		player = p;

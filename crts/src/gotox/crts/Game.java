@@ -13,6 +13,7 @@ import gotox.crts.controller.InputReader;
 import gotox.crts.controller.Player;
 import gotox.crts.model.ImmutableMap;
 import gotox.crts.model.MapModel;
+import gotox.crts.networking.Network;
 import gotox.crts.view.MapDisplay;
 
 import javax.swing.JFrame;
@@ -22,6 +23,7 @@ public class Game extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private volatile boolean isRunning;
 	private InputReader ir;
+	private Network n;
 
 	public Game() {
 		init();
@@ -49,12 +51,15 @@ public class Game extends JFrame {
 			}
 		});
 		setLocationRelativeTo(null);
+		
+		n = new Network();
 	}
 	
 	private void gameLoop(){
 		isRunning = true;
 		while (isRunning){
 			List<Action> inputs = ir.getActions();
+			n.queueActions(inputs);
 		}
 	}
 
