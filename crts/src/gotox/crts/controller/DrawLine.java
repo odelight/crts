@@ -5,7 +5,7 @@ import java.awt.Point;
 import gotox.crts.model.AbstractColor;
 import gotox.crts.model.MapModel;
 
-public class DrawLine implements Action{
+public class DrawLine extends Action{
 
 	private static final long serialVersionUID = 1L;
 	private final Point p1, p2;
@@ -31,5 +31,6 @@ public class DrawLine implements Action{
 				}
 			}
 	}
+
 
 }

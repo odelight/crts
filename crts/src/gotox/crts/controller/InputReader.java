@@ -71,7 +71,7 @@ public class InputReader implements MouseMotionListener, MouseListener {
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		mouseDragged(e);
+//		mouseDragged(e);
 	}
 
 	@Override

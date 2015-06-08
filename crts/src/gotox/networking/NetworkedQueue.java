@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -70,8 +71,7 @@ public class NetworkedQueue<T extends Serializable> {
 		List<T> ret = new ArrayList<T>();
 
 		int highestAvailableFrame = Integer.MAX_VALUE;
-		for (int i = 0; i < receivedFramesBySource.size(); i++) {
-			List<FrameWrapper<T>> frameList = receivedFramesBySource.get(i);
+		for (List<FrameWrapper<T>> frameList : receivedFramesBySource) {
 			if (frameList.size() > 0) {
 				FrameWrapper<T> f = frameList.get(frameList.size() - 1);
 				highestAvailableFrame = Math.min(highestAvailableFrame,
@@ -80,13 +80,13 @@ public class NetworkedQueue<T extends Serializable> {
 				return ret;
 			}
 		}
-		for (int i = 0; i < receivedFramesBySource.size(); i++) {
-			List<FrameWrapper<T>> frameList = receivedFramesBySource.get(i);
+		for (List<FrameWrapper<T>> frameList : receivedFramesBySource) {
 			synchronized (frameList) {
-				while (frameList.size() > 0) {
-					FrameWrapper<T> wrapped = frameList.get(0);
+				Iterator<FrameWrapper<T>> iter = frameList.iterator();
+				while (iter.hasNext()) {
+					FrameWrapper<T> wrapped = iter.next();
 					if (wrapped.getFrameNumber() <= highestAvailableFrame) {
-						frameList.remove(0);
+						iter.remove();
 						ret.add(wrapped.innerFrame);
 					} else {
 						break;
