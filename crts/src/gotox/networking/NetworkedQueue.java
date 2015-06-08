@@ -26,6 +26,10 @@ public class NetworkedQueue<T extends Serializable> {
 	private final List<Poller<T>> remoteInPollers;
 	private int lastSentFrame = 0;
 
+	public NetworkedQueue(ObjectOutputStream out, ObjectInputStream in) {
+		this(Arrays.asList(out), Arrays.asList(in));
+	}
+
 	public NetworkedQueue(List<ObjectOutputStream> remoteOut,
 			List<ObjectInputStream> remoteIn) {
 		this.remoteOut = remoteOut;
@@ -49,10 +53,6 @@ public class NetworkedQueue<T extends Serializable> {
 		}
 	}
 
-	public NetworkedQueue(ObjectOutputStream out, ObjectInputStream in) {
-		this(Arrays.asList(out), Arrays.asList(in));
-	}
-
 	public void pushFrame(T frame) throws IOException {
 		if (frame == null)
 			throw new NullPointerException();
@@ -71,13 +71,15 @@ public class NetworkedQueue<T extends Serializable> {
 		List<T> ret = new ArrayList<T>();
 
 		int highestAvailableFrame = Integer.MAX_VALUE;
-		for (List<FrameWrapper<T>> frameList : receivedFramesBySource) {
-			if (frameList.size() > 0) {
-				FrameWrapper<T> f = frameList.get(frameList.size() - 1);
-				highestAvailableFrame = Math.min(highestAvailableFrame,
-						f.getFrameNumber());
-			} else {
-				return ret;
+			for (List<FrameWrapper<T>> frameList : receivedFramesBySource) {
+				synchronized (frameList) {
+				if (frameList.size() > 0) {
+					FrameWrapper<T> f = frameList.get(frameList.size() - 1);
+					highestAvailableFrame = Math.min(highestAvailableFrame,
+							f.getFrameNumber());
+				} else {
+					return ret;
+				}
 			}
 		}
 		for (List<FrameWrapper<T>> frameList : receivedFramesBySource) {
@@ -157,7 +159,7 @@ public class NetworkedQueue<T extends Serializable> {
 					}
 				}
 			} catch (InterruptedIOException e) {
-				//Will get interrupted exception when shutting down.
+				// Will get interrupted exception when shutting down.
 				if (running)
 					throw new RuntimeException(e);
 			} catch (ClassNotFoundException | IOException e) {

@@ -1,5 +1,6 @@
 package gotox.crts.controller;
 
+import java.awt.Dimension;
 import java.awt.Point;
 
 import gotox.crts.model.AbstractColor;
@@ -30,6 +31,21 @@ public class DrawLine extends Action{
 							(int) (p1.y + (i * dy) / distance), c);
 				}
 			}
+	}
+	
+	public void validatePoint(Point p, MapModel m){
+		Dimension d = m.getDimension();
+		if (p.x < 0){
+			p.x = 0;
+		} else if (p.x >= d.width){
+			p.x = d.width - 1;
+		}
+		
+		if (p.y < 0){
+			p.y = 0;
+		} else if (p.y >= d.height){
+			p.y = d.height - 1;
+		}
 	}
 
 

@@ -3,6 +3,7 @@ package gotox.crts.networking;
 import gotox.crts.controller.Action;
 import gotox.networking.NetworkedQueue;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -11,6 +12,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,33 +21,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Network {
-	private final NetworkedQueue<NetworkFrame> frameQueue;
+	private  NetworkedQueue<NetworkFrame> frameQueue;
 	private final List<NetworkFrame> receivedFrames = new ArrayList<>();
 	private AtomicInteger frameNumber = new AtomicInteger(0);
 
 	private final ReentrantLock NextFrameAcionsLock = new ReentrantLock();
 	private List<Action> NextFrameActions = new ArrayList<>();
+	
+	private List<Closeable> cleanupList = new ArrayList<>();
 
 	public Network(int portNumber) throws IOException {
-
-		try (ServerSocket serverSocket = new ServerSocket(portNumber);
-				Socket clientSocket = serverSocket.accept();
-				OutputStream out = clientSocket.getOutputStream();
-				InputStream in = clientSocket.getInputStream();) {
-			frameQueue = new NetworkedQueue<NetworkFrame>(
-					new ObjectOutputStream(out), new ObjectInputStream(in));
-		}
-
+		ServerSocket serverSocket = new ServerSocket(portNumber);
+		cleanupList.add(serverSocket);
+		Socket s = serverSocket.accept();
+		cleanupList.add(s);
+		init(s);
 	}
 
 	public Network(String hostName, int portNumber) throws IOException {
-		try (Socket clientSocket = new Socket(hostName, portNumber);
-				OutputStream out = clientSocket.getOutputStream();
-				InputStream in = clientSocket.getInputStream();) {
-			frameQueue = new NetworkedQueue<NetworkFrame>(
-					new ObjectOutputStream(out), new ObjectInputStream(in));
-		}
+		Socket s = new Socket(hostName, portNumber);
+		cleanupList.add(s);
+		init(s);
 	}
+	
 
 	// Starts a vestigial network for single player.
 	public Network() {
@@ -54,8 +52,24 @@ public class Network {
 				Collections.<ObjectInputStream> emptyList());
 	}
 
-	public void start() {
+	private void init (Socket s) throws IOException{
+		OutputStream out = s.getOutputStream();
+		InputStream in = s.getInputStream();
+		ObjectOutputStream objOut = new ObjectOutputStream(out);
+		objOut.flush();
+		ObjectInputStream objIn = new ObjectInputStream(in);
+		frameQueue = new NetworkedQueue<NetworkFrame>(objOut, objIn);
+		cleanupList.addAll(Arrays.asList(out, in, objOut, objIn));
+	}
 
+	public void cleanUp() throws IOException{
+		Collections.reverse(cleanupList);
+		for(Closeable c : cleanupList){
+			c.close();
+		}
+	}
+	
+	public void start() {
 		new java.util.Timer().scheduleAtFixedRate(new java.util.TimerTask() {
 			@Override
 			public void run() {
