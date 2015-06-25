@@ -44,6 +44,7 @@ public class Game extends JFrame {
 		int height = 900;
 		
 		map = new MapModel(new Dimension(width, height));
+		initMap(width, height);		
 		ImmutableMap iMap = new ImmutableMap(map);
 		
 		MapDisplay md = new MapDisplay(iMap);
@@ -62,6 +63,20 @@ public class Game extends JFrame {
 			}
 		});
 		setLocationRelativeTo(null);
+	}
+	
+	private void initMap(int width, int height) {
+		int cornerSize = 200;
+		for(int i = 0; i < cornerSize; i++){
+			for(int j = 0; j < cornerSize; j++){
+				map.setColor(i, j, AbstractColor.PLAYER1);
+			}			
+		}
+		for(int i = width - cornerSize; i < width; i++){
+			for(int j = height -cornerSize; j < height; j++){
+				map.setColor(i, j, AbstractColor.PLAYER2);
+			}			
+		}
 	}
 
 	private void start() {
