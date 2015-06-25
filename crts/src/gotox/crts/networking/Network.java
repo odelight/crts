@@ -85,7 +85,7 @@ public class Network {
 					throw new RuntimeException(e);
 				}
 			}
-		}, 0, 200);
+		}, 0, 50);
 	}
 
 	public void queueActions(Collection<Action> actions) {
