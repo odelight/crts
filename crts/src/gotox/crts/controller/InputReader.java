@@ -3,16 +3,14 @@ package gotox.crts.controller;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class InputReader {
 
-	private Point lastMousePosition;
+	private List<Point> currentDrawPoints = new ArrayList<>();
 	private final Player player;
 	private List<Action> actionList = new ArrayList<>();
 	private ReentrantLock actionListLock = new ReentrantLock();
@@ -26,18 +24,15 @@ public class InputReader {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				Point p = e.getPoint();
-				if (lastMousePosition != null) {
-					DrawLine d = new DrawLine(p, lastMousePosition,
-							player.getColor());
-					queueAction(d);
-				}
-				lastMousePosition = p;
+					currentDrawPoints.add(p);
 			}
 		};
 		mouseAdapter = new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				lastMousePosition = null;
+				DrawPolyLine d = new DrawPolyLine(currentDrawPoints, player.getColor());
+				currentDrawPoints = new ArrayList<>();
+				queueAction(d);
 			}
 		};
 	}
