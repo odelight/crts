@@ -26,16 +26,18 @@ public class DrawFilledPolyRegion extends Action {
 	public void apply(MapModel map) {
 		List<Point> newPoints = new ArrayList<>();
 		List<List<Point>> fillableSegments = getFillableSegments(map);
-		for (List<Point> fillableSegment : fillableSegments) {
-			List<Point> fillableBoundary = getFillableBoundary(fillableSegment,
-					map);
-			newPoints.addAll(getInteriorPoints(fillableBoundary, map));
-			// newPoints.addAll(fillableBoundary);
 
+		List<Point> fillableBoundary = null;
+		for (List<Point> fillableSegment : fillableSegments) {
+			fillableBoundary = getFillableBoundary(fillableSegment, map);
+			newPoints.addAll(getInteriorPoints(fillableBoundary, map));
 		}
 		for (Point p : newPoints) {
 			map.setColor(p, c);
 		}
+		// for (Point p : fillableBoundary) {
+		// map.setColor(p, AbstractColor.PLAYER2);
+		// }
 	}
 
 	List<Point> getInteriorPoints(List<Point> closedFigure, MapModel map) {
@@ -45,26 +47,48 @@ public class DrawFilledPolyRegion extends Action {
 		for (int x = 0; x < d.width; x++) {
 			boolean insideFigure = false;
 			boolean lastPointOnBoundary = false;
+
+			boolean leftCrossed = false;
+			boolean rightCrossed = false;
+
 			List<Point> columnAdds = new ArrayList<>();
 			for (int y = 0; y < d.height; y++) {
+
+				if (x > 0) {
+					Point leftPoint = new Point(x - 1, y);
+					if (boundaryPoints.contains(leftPoint)) {
+						leftCrossed = true;
+					}
+				} else {
+					leftCrossed = true;
+				}
+				
+				if (x <= map.getDimension().width) {
+					Point rightPoint = new Point(x + 1, y);
+					if (boundaryPoints.contains(rightPoint)) {
+						rightCrossed = true;
+					}
+				} else {
+					rightCrossed = true;
+				}
+				
+				
+
 				Point p = new Point(x, y);
-//				if(x==80){
-//					System.out.println("y: " + y +
-//										" contains: " + boundaryPoints.contains(p) + 
-//										" prev: " + lastPointOnBoundary +
-//										" insideFigure: " + insideFigure);
-//				}
-				if (boundaryPoints.contains(p)) {
-					if (!lastPointOnBoundary){		
-						if(insideFigure){
+//				if (boundaryPoints.contains(p)) {
+					if (leftCrossed && rightCrossed) {
+						if (insideFigure) {
 							ret.addAll(columnAdds);
+							columnAdds = new ArrayList<>();
 						}
 						insideFigure = !insideFigure;
+						leftCrossed = false;
+						rightCrossed = false;
 					}
-					lastPointOnBoundary = true;
-				} else {
-					lastPointOnBoundary = false;
-				}
+//					lastPointOnBoundary = true;
+//				} else {
+//					lastPointOnBoundary = false;
+//				}
 				if (insideFigure) {
 					columnAdds.add(p);
 				}
