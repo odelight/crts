@@ -15,25 +15,36 @@ public class DrawFilledPolyRegion extends Action {
 
 	private static final long serialVersionUID = 1L;
 	private final List<Point> points;
-	private final AbstractColor c;
+	private final AbstractColor thisPlayerColor;
 
 	public DrawFilledPolyRegion(List<Point> points, AbstractColor c) {
 		this.points = points;
-		this.c = c;
+		this.thisPlayerColor = c;
 	}
 
 	@Override
 	public void apply(MapModel map) {
+		if (points.size() < 2) {
+			return;
+		}
 		List<Point> newPoints = new ArrayList<>();
 		List<List<Point>> fillableSegments = getFillableSegments(map);
 
 		List<Point> fillableBoundary = null;
 		for (List<Point> fillableSegment : fillableSegments) {
 			fillableBoundary = getFillableBoundary(fillableSegment, map);
+			for(Point p : fillableBoundary){
+				AbstractColor c = map.getColor(p);
+				if(!(c.equals(thisPlayerColor) || c.equals(AbstractColor.BLANK))){
+					return;
+				}
+			}
 			newPoints.addAll(getInteriorPoints(fillableBoundary, map));
 		}
+		if(newPoints.size() < 50000){
 		for (Point p : newPoints) {
-			map.setColor(p, c);
+			map.setColor(p, thisPlayerColor);
+		}
 		}
 		// for (Point p : fillableBoundary) {
 		// map.setColor(p, AbstractColor.PLAYER2);
@@ -46,49 +57,40 @@ public class DrawFilledPolyRegion extends Action {
 		Dimension d = map.getDimension();
 		for (int x = 0; x < d.width; x++) {
 			boolean insideFigure = false;
-			boolean lastPointOnBoundary = false;
+			// boolean lastPointOnBoundary = false;
 
-			boolean leftCrossed = false;
-			boolean rightCrossed = false;
+			boolean leftEntered = false;
+			boolean rightEntered = false;
+			boolean crossed = false;
 
 			List<Point> columnAdds = new ArrayList<>();
 			for (int y = 0; y < d.height; y++) {
-
-				if (x > 0) {
-					Point leftPoint = new Point(x - 1, y);
-					if (boundaryPoints.contains(leftPoint)) {
-						leftCrossed = true;
-					}
-				} else {
-					leftCrossed = true;
+				if (isRightEntered(x, y, map, boundaryPoints)) {
+					rightEntered = true;
 				}
-				
-				if (x <= map.getDimension().width) {
-					Point rightPoint = new Point(x + 1, y);
-					if (boundaryPoints.contains(rightPoint)) {
-						rightCrossed = true;
-					}
-				} else {
-					rightCrossed = true;
+				if (isLeftEntered(x, y, map, boundaryPoints)) {
+					leftEntered = true;
 				}
-				
-				
 
 				Point p = new Point(x, y);
-//				if (boundaryPoints.contains(p)) {
-					if (leftCrossed && rightCrossed) {
-						if (insideFigure) {
-							ret.addAll(columnAdds);
-							columnAdds = new ArrayList<>();
-						}
-						insideFigure = !insideFigure;
-						leftCrossed = false;
-						rightCrossed = false;
+				if (boundaryPoints.contains(p)) {
+					crossed = true;
+				}
+				if (crossed && leftEntered && rightEntered) {
+					if (insideFigure) {
+						ret.addAll(columnAdds);
+						columnAdds = new ArrayList<>();
 					}
-//					lastPointOnBoundary = true;
-//				} else {
-//					lastPointOnBoundary = false;
-//				}
+					insideFigure = !insideFigure;
+					crossed = false;
+					if (boundaryPoints.contains(p)) {
+						leftEntered = false;
+						rightEntered = false;
+					} else {
+						leftEntered = isLeftEntered(x, y, map, boundaryPoints);
+						rightEntered = isRightEntered(x, y, map, boundaryPoints);
+					}
+				}
 				if (insideFigure) {
 					columnAdds.add(p);
 				}
@@ -96,6 +98,34 @@ public class DrawFilledPolyRegion extends Action {
 		}
 		ret.addAll(closedFigure);
 		return ret;
+	}
+
+	private boolean isRightEntered(int x, int y, MapModel map,
+			Set<Point> boundaryPoints) {
+		boolean rightEntered = false;
+		if (x <= map.getDimension().width) {
+			Point rightPoint = new Point(x + 1, y);
+			if (boundaryPoints.contains(rightPoint)) {
+				rightEntered = true;
+			}
+		} else {
+			rightEntered = true;
+		}
+		return rightEntered;
+	}
+
+	private boolean isLeftEntered(int x, int y, MapModel map,
+			Set<Point> boundaryPoints) {
+		boolean leftEntered = false;
+		if (x > 0) {
+			Point leftPoint = new Point(x - 1, y);
+			if (boundaryPoints.contains(leftPoint)) {
+				leftEntered = true;
+			}
+		} else {
+			leftEntered = true;
+		}
+		return leftEntered;
 	}
 
 	List<Point> getFillableBoundary(List<Point> fillableSegments, MapModel map) {
@@ -165,9 +195,9 @@ public class DrawFilledPolyRegion extends Action {
 			Point p = iter.next();
 			AbstractColor thisColor = map.getColor(p);
 			AbstractColor lastColor = map.getColor(lastPoint);
-			if (thisColor.equals(AbstractColor.BLANK) && lastColor.equals(c)) {
+			if (thisColor.equals(AbstractColor.BLANK) && lastColor.equals(thisPlayerColor)) {
 				ret.add(p);
-			} else if (thisColor.equals(c)
+			} else if (thisColor.equals(thisPlayerColor)
 					&& lastColor.equals(AbstractColor.BLANK)) {
 				ret.add(lastPoint);
 			}
@@ -249,6 +279,7 @@ public class DrawFilledPolyRegion extends Action {
 		return new Iterator<Point>() {
 			private Point previous = secondPoint;
 			private Point preprevious = startPoint;
+			private Set<Point> iteratedPoints = new HashSet<>();
 
 			@Override
 			public boolean hasNext() {
@@ -260,6 +291,7 @@ public class DrawFilledPolyRegion extends Action {
 				Point next = peakNext();
 				preprevious = previous;
 				previous = next;
+				iteratedPoints.add(next);
 				return next;
 			}
 
@@ -274,13 +306,33 @@ public class DrawFilledPolyRegion extends Action {
 				Set<Point> xings = getBoundaryCrossings(
 						validNeighbors.iterator(), map);
 				xings.remove(preprevious);
+
 				if (xings.size() < 1) {
 					return null;
-				} else if (xings.size() == 1) {
-					return xings.iterator().next();
+				}
+				Iterator<Point> iter = xings.iterator();
+				if (xings.size() == 1) {
+					return iter.next();
 				} else {
-					throw new IllegalStateException("Unexpected xings: "
-							+ xings);
+					Point maxDistPoint = null;
+					double maxDist = 0;
+					while (iter.hasNext()) {
+						Point p = iter.next();
+						while (iteratedPoints.contains(p)) {
+							if (iter.hasNext()) {
+								p = iter.next();
+							} else {
+								throw new IllegalStateException("previous: "
+										+ previous + "preprevious: "
+										+ preprevious);
+							}
+						}
+						if (p.distanceSq(preprevious) > maxDist) {
+							maxDistPoint = p;
+							maxDist = p.distanceSq(preprevious);
+						}
+					}
+					return maxDistPoint;
 				}
 			}
 		};
@@ -313,6 +365,7 @@ public class DrawFilledPolyRegion extends Action {
 		if (allNeighborsValid) {
 			ret.add(ret.get(0));
 		}
+		System.out.println(ret);
 		return ret;
 	}
 
