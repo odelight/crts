@@ -30,7 +30,7 @@ public class InputReader {
 		mouseAdapter = new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				DrawPolyLine d = new DrawPolyLine(currentDrawPoints, player.getColor());
+				DrawFilledPolyRegion d = new DrawFilledPolyRegion(currentDrawPoints, player.getColor());
 				currentDrawPoints = new ArrayList<>();
 				queueAction(d);
 			}
