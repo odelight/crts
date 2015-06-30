@@ -1,14 +1,18 @@
 package gotox.crts.view;
 
+import gotox.crts.GeometryUtils;
 import gotox.crts.model.AbstractColor;
 import gotox.crts.model.ImmutableMap;
+import gotox.crts.model.Polygon;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.JPanel;
@@ -44,11 +48,33 @@ public class MapDisplay extends JPanel implements RedrawListener {
 	}
 
 	public void draw() {
+		clearImage();
+		Map<AbstractColor, Polygon> blobMap = map.getBlobMap();
+		for(Map.Entry<AbstractColor, Polygon> e : blobMap.entrySet()){
+			drawPolygon(e.getKey(), e.getValue());
+		}
+	}
+	
+	public void clearImage(){
 		for (int x = 0; x < mapDimension.width; x++) {
 			for (int y = 0; y < mapDimension.height; y++) {
-				AbstractColor ac = map.getColor(x, y);
-				Color c = colorModel.get(ac);
-				image.setRGB(x, y, c.getRGB());
+				Color blank = colorModel.get(AbstractColor.BLANK);
+				image.setRGB(x, y, blank.getRGB());
+			}
+		}
+	}
+	
+	public void drawPolygon(AbstractColor ac, Polygon paul){
+		Iterator<Point> paulIter = paul.iterator();
+		Point trailingVertex;
+		Point leadingVertex = paulIter.next();
+		while(paulIter.hasNext()){
+			trailingVertex = leadingVertex;
+			leadingVertex = paulIter.next();
+			Iterator<Point> lineIter = GeometryUtils.lineIterator(trailingVertex, leadingVertex);
+			while(lineIter.hasNext()){
+				Point p = lineIter.next();
+				image.setRGB(p.x, p.y, colorModel.get(ac).getRGB());
 			}
 		}
 	}

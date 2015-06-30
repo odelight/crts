@@ -6,6 +6,7 @@ import gotox.crts.model.MapModel;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -24,32 +25,45 @@ public class DrawFilledPolyRegion extends Action {
 
 	@Override
 	public void apply(MapModel map) {
-		if (points.size() < 2) {
-			return;
-		}
-		List<Point> newPoints = new ArrayList<>();
-		List<List<Point>> fillableSegments = getFillableSegments(map);
-
-		List<Point> fillableBoundary = null;
-		for (List<Point> fillableSegment : fillableSegments) {
-			fillableBoundary = getFillableBoundary(fillableSegment, map);
-			for(Point p : fillableBoundary){
-				AbstractColor c = map.getColor(p);
-				if(!(c.equals(thisPlayerColor) || c.equals(AbstractColor.BLANK))){
-					return;
-				}
-			}
-			newPoints.addAll(getInteriorPoints(fillableBoundary, map));
-		}
-		if(newPoints.size() < 50000){
-		for (Point p : newPoints) {
-			map.setColor(p, thisPlayerColor);
-		}
-		}
-		// for (Point p : fillableBoundary) {
-		// map.setColor(p, AbstractColor.PLAYER2);
-		// }
+//		if (points.size() < 2) {
+//			return;
+//		}
+//		List<Point> newPoints = new ArrayList<>();
+//		List<List<Point>> fillableSegments = getFillableSegments(map);
+//
+//		List<Point> fillableBoundary = null;
+//		for (List<Point> fillableSegment : fillableSegments) {
+//			
+//			System.out.println("fillable seg: " + fillableSegment);
+//			
+//			
+//			fillableBoundary = getFillableBoundary(fillableSegment, map);
+////			widenObject(fillableBoundary, map);
+//			for(Point p : fillableBoundary){
+//				AbstractColor c = map.getColor(p);
+//				if(!(c.equals(thisPlayerColor) || c.equals(AbstractColor.BLANK))){
+//					return;
+//				}
+//			}
+//			newPoints.addAll(getInteriorPoints(fillableBoundary, map));
+//		}
+//		if(newPoints.size() < 500000000){
+//		for (Point p : newPoints) {
+//			map.setColor(p, thisPlayerColor);
+//		}
+//		}
+//		 for (Point p : fillableBoundary) {
+//		 map.setColor(p, AbstractColor.PLAYER2);
+//		 }
 	}
+	
+//	private void widenObject(List<Point> object, MapModel map){
+//		Set<Point> toBeAdded = new HashSet<>();
+//		for(Point p : object){
+//			toBeAdded.addAll(validNeighborsClockwise(p, map));
+//		}
+//		object.addAll(toBeAdded);
+//	}
 
 	List<Point> getInteriorPoints(List<Point> closedFigure, MapModel map) {
 		List<Point> ret = new ArrayList<>();
@@ -71,11 +85,17 @@ public class DrawFilledPolyRegion extends Action {
 				if (isLeftEntered(x, y, map, boundaryPoints)) {
 					leftEntered = true;
 				}
-
+				
+				Point upOne = new Point(x, y - 1);
 				Point p = new Point(x, y);
-				if (boundaryPoints.contains(p)) {
+				if (boundaryPoints.contains(upOne) && !boundaryPoints.contains(p)) {
 					crossed = true;
+					if(x==199){
+						System.out.println("y " + y + " x " + x +" re " + rightEntered + " le " + leftEntered + " ce " + crossed + " inside figure " + insideFigure );
+					}
 				}
+				
+				
 				if (crossed && leftEntered && rightEntered) {
 					if (insideFigure) {
 						ret.addAll(columnAdds);
@@ -91,6 +111,11 @@ public class DrawFilledPolyRegion extends Action {
 						rightEntered = isRightEntered(x, y, map, boundaryPoints);
 					}
 				}
+				
+				if(x==199){
+					System.out.println("y " + y + " x " + x +" re " + rightEntered + " le " + leftEntered + " ce " + crossed + " inside figure " + insideFigure );
+				}
+				
 				if (insideFigure) {
 					columnAdds.add(p);
 				}
@@ -341,13 +366,13 @@ public class DrawFilledPolyRegion extends Action {
 	// If all neighbors of p are valid the first and last point in iterator will
 	// be same. Otherwise not.
 	// Neighbors that are invalid points are not included
-	Iterable<Point> validNeighborsClockwise(Point p, MapModel m) {
+	Collection<Point> validNeighborsClockwise(Point p, MapModel m) {
 		Point[] neighbors = neighborsClockwise(p);
 		List<Point> ret = new ArrayList<Point>();
 		List<Point> suffix = null;
 		boolean allNeighborsValid = true;
 		for (Point neighbor : neighbors) {
-			if (isValidPoint(neighbor, m)) {
+			if (m.isValidPoint(neighbor)) {
 				ret.add(neighbor);
 			} else {
 				if (allNeighborsValid == true) {
@@ -365,7 +390,6 @@ public class DrawFilledPolyRegion extends Action {
 		if (allNeighborsValid) {
 			ret.add(ret.get(0));
 		}
-		System.out.println(ret);
 		return ret;
 	}
 
@@ -380,9 +404,6 @@ public class DrawFilledPolyRegion extends Action {
 		return neighbors;
 	}
 
-	boolean isValidPoint(Point p, MapModel m) {
-		Dimension d = m.getDimension();
-		return ((0 <= p.x) && (p.x < d.width) && (0 < p.y) && (p.y < d.height));
-	}
+
 
 }

@@ -1,11 +1,13 @@
 package gotox.crts;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowStateListener;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,6 +18,7 @@ import gotox.crts.controller.Player;
 import gotox.crts.model.AbstractColor;
 import gotox.crts.model.ImmutableMap;
 import gotox.crts.model.MapModel;
+import gotox.crts.model.Polygon;
 import gotox.crts.networking.Network;
 import gotox.crts.view.MapDisplay;
 
@@ -39,16 +42,19 @@ public class Game extends JFrame {
 		this(new Network(), AbstractColor.PLAYER1);
 	}
 	public Game(Network n, AbstractColor playerColor) {
+		this(n, playerColor,new InputReader(new Player(playerColor)));
+	}
+	public Game(Network n, AbstractColor playerColor, InputReader ir) {
+		this.ir = ir;
 		this.n = n;
 		int width = 1200;
-		int height = 900;
+		int height = 800;
 		
 		map = new MapModel(new Dimension(width, height));
 		initMap(width, height);		
 		ImmutableMap iMap = new ImmutableMap(map);
 		
 		MapDisplay md = new MapDisplay(iMap);
-		ir = new InputReader(new Player(playerColor));
 		
 		add(md);
 		addMouseMotionListener(ir.asMouseMotionAdapter());
@@ -67,19 +73,39 @@ public class Game extends JFrame {
 	
 	private void initMap(int width, int height) {
 		int cornerSize = 200;
-		for(int i = 0; i < cornerSize; i++){
-			for(int j = 0; j < cornerSize; j++){
-				map.setColor(i, j, AbstractColor.PLAYER1);
-			}			
+		{
+		List<Point> player1Blob = Arrays.asList(
+				new Point[]{new Point(0,0),
+						new Point(cornerSize,0),
+						new Point(cornerSize,cornerSize),
+						new Point(0,cornerSize),
+						new Point(0,0)});
+		Polygon player1 = new Polygon(player1Blob, map);
+		map.putBlob(AbstractColor.PLAYER1, player1);
 		}
-		for(int i = width - cornerSize; i < width; i++){
-			for(int j = height -cornerSize; j < height; j++){
-				map.setColor(i, j, AbstractColor.PLAYER2);
-			}			
+		{
+		List<Point> player2Blob = Arrays.asList(
+				new Point[]{new Point(width-1,height-1),
+						new Point(width - cornerSize,height-1),
+						new Point(width - cornerSize,height - cornerSize),
+						new Point(width-1,height - cornerSize),
+						new Point(width-1,height-1)});
+		Polygon player2 = new Polygon(player2Blob, map);
+		map.putBlob(AbstractColor.PLAYER2, player2);
 		}
+//		for(int i = 0; i < cornerSize; i++){
+//			for(int j = 0; j < cornerSize; j++){
+//				map.setColor(i, j, AbstractColor.PLAYER1);
+//			}			
+//		}
+//		for(int i = width - cornerSize; i < width; i++){
+//			for(int j = height -cornerSize; j < height; j++){
+//				map.setColor(i, j, AbstractColor.PLAYER2);
+//			}			
+//		}
 	}
 
-	private void start() {
+	public void start() {
 		n.start();
 		gameLoop();
 	}
@@ -154,6 +180,10 @@ public class Game extends JFrame {
 		printUsage();
 		System.out.println("Stack trace of issue:");
 		e.printStackTrace();
+	}
+	
+	public MapModel getMap(){
+		return map;
 	}
 
 }

@@ -4,6 +4,8 @@ import gotox.crts.model.AbstractColor;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.Collections;
+import java.util.Map;
 /**
  * Provides an immutable view of an underlying map.
  * DOES NOT MAKE UNDERLYING MAP IMMUTABLE.
@@ -18,12 +20,19 @@ public class ImmutableMap {
 		innerMap = m;
 	}
 
-	public AbstractColor getColor(Point p) {
-		return innerMap.getColor(p);
+	public Polygon getBlob(AbstractColor c){
+		return innerMap.getBlob(c);
 	}
-	public AbstractColor getColor(int x, int y){
-		return innerMap.getColor(x,y);
+	
+	public Map<AbstractColor, Polygon> getBlobMap(){
+		return Collections.unmodifiableMap(innerMap.getBlobMap());
 	}
+
+	
+	public boolean isValidPoint(Point p) {
+		return innerMap.isValidPoint(p);
+	}
+	
 	public Dimension getDimension(){
 		return innerMap.getDimension();
 	}

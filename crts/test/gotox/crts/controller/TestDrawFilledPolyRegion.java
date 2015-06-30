@@ -147,4 +147,42 @@ public class TestDrawFilledPolyRegion {
 		polyLine.add(new Point(40, 40));
 		return polyLine;
 	}
+	
+	@Test
+	public void testApplyThinCrack() {
+		DrawFilledPolyRegion region = new DrawFilledPolyRegion(
+				getThinCrackPolyLine(), AbstractColor.PLAYER1);
+		region.apply(map);
+		
+		assertEquals(AbstractColor.BLANK, map.getColor(75, 75));
+		assertEquals(AbstractColor.BLANK, map.getColor(75, 25));
+		assertEquals(AbstractColor.BLANK, map.getColor(35, 50));
+		
+		assertEquals(AbstractColor.PLAYER1, map.getColor(35, 51));
+		assertEquals(AbstractColor.PLAYER1, map.getColor(35, 49));
+		assertEquals(AbstractColor.PLAYER1, map.getColor(29, 51));
+		assertEquals(AbstractColor.PLAYER1, map.getColor(29, 49));		
+		assertEquals(AbstractColor.PLAYER1, map.getColor(30, 51));
+		assertEquals(AbstractColor.PLAYER1, map.getColor(30, 49));
+		assertEquals(AbstractColor.PLAYER1, map.getColor(31, 51));
+		assertEquals(AbstractColor.PLAYER1, map.getColor(31, 49));
+
+
+		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 75));
+		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 25));
+		
+	}
+
+	
+	private List<Point> getThinCrackPolyLine() {
+		List<Point> polyLine = new ArrayList<>();
+		polyLine.add(new Point(20, 20));
+		polyLine.add(new Point(20, 80));
+		polyLine.add(new Point(40, 80));
+		polyLine.add(new Point(40, 51));
+		polyLine.add(new Point(30, 51));		
+		polyLine.add(new Point(30, 20));
+		return polyLine;
+	}
+	
 }
