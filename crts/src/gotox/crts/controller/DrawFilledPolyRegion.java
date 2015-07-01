@@ -1,7 +1,10 @@
 package gotox.crts.controller;
 
 import gotox.crts.model.AbstractColor;
+import gotox.crts.model.Line;
 import gotox.crts.model.MapModel;
+import gotox.crts.model.Polygon;
+import gotox.crts.model.Polyline;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -16,15 +19,24 @@ public class DrawFilledPolyRegion extends Action {
 
 	private static final long serialVersionUID = 1L;
 	private final List<Point> points;
-	private final AbstractColor thisPlayerColor;
+	private final AbstractColor drawColor;
 
 	public DrawFilledPolyRegion(List<Point> points, AbstractColor c) {
 		this.points = points;
-		this.thisPlayerColor = c;
+		this.drawColor = c;
 	}
 
 	@Override
 	public void apply(MapModel map) {
+		Polyline draw = new Polyline(points, map);
+		Polygon blob = map.getBlob(drawColor);
+		Point xingLeading, xingTrailing;
+		for(Line l : draw.lineIterable()){
+			Point xing = blob.intersectsLine(l);
+			if(xing != null){
+				
+			}
+		}
 //		if (points.size() < 2) {
 //			return;
 //		}
@@ -220,9 +232,9 @@ public class DrawFilledPolyRegion extends Action {
 			Point p = iter.next();
 			AbstractColor thisColor = map.getColor(p);
 			AbstractColor lastColor = map.getColor(lastPoint);
-			if (thisColor.equals(AbstractColor.BLANK) && lastColor.equals(thisPlayerColor)) {
+			if (thisColor.equals(AbstractColor.BLANK) && lastColor.equals(drawColor)) {
 				ret.add(p);
-			} else if (thisColor.equals(thisPlayerColor)
+			} else if (thisColor.equals(drawColor)
 					&& lastColor.equals(AbstractColor.BLANK)) {
 				ret.add(lastPoint);
 			}

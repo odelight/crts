@@ -65,17 +65,21 @@ public class MapDisplay extends JPanel implements RedrawListener {
 	}
 	
 	public void drawPolygon(AbstractColor ac, Polygon paul){
-		Iterator<Point> paulIter = paul.iterator();
-		Point trailingVertex;
-		Point leadingVertex = paulIter.next();
-		while(paulIter.hasNext()){
-			trailingVertex = leadingVertex;
-			leadingVertex = paulIter.next();
-			Iterator<Point> lineIter = GeometryUtils.lineIterator(trailingVertex, leadingVertex);
-			while(lineIter.hasNext()){
-				Point p = lineIter.next();
-				image.setRGB(p.x, p.y, colorModel.get(ac).getRGB());
-			}
+//		Iterator<Point> paulIter = paul.iterator();
+//		Point trailingVertex;
+//		Point leadingVertex = paulIter.next();
+//		while(paulIter.hasNext()){
+//			trailingVertex = leadingVertex;
+//			leadingVertex = paulIter.next();
+//			Iterator<Point> lineIter = GeometryUtils.lineIterator(trailingVertex, leadingVertex);
+//			while(lineIter.hasNext()){
+//				Point p = lineIter.next();
+//				image.setRGB(p.x, p.y, colorModel.get(ac).getRGB());
+//			}
+//		}
+		Iterable<Point> interior = paul.getInterior();
+		for(Point p : interior){
+			image.setRGB(p.x, p.y, colorModel.get(ac).getRGB());
 		}
 	}
 
