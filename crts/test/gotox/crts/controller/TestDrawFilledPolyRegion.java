@@ -5,10 +5,12 @@ import static org.junit.Assert.*;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import gotox.crts.model.AbstractColor;
 import gotox.crts.model.MapModel;
+import gotox.crts.model.Polygon;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,49 +20,37 @@ public class TestDrawFilledPolyRegion {
 
 	@Before
 	public void init() {
-		map = new MapModel(new Dimension(100, 100));
+		int width = 100;
+		int height = 100;
+		map = new MapModel(new Dimension(width, height));
 		int cornerSize = 50;
-		for (int i = 0; i < cornerSize; i++) {
-			for (int j = 0; j < cornerSize; j++) {
-				map.setColor(i, j, AbstractColor.PLAYER1);
-			}
+		{
+		List<Point> player1Blob = Arrays.asList(
+				new Point[]{new Point(0,0),
+						new Point(cornerSize,0),
+						new Point(cornerSize,cornerSize),
+						new Point(0,cornerSize),
+						new Point(0,0)});
+		Polygon player1 = new Polygon(player1Blob, map);
+		map.putBlob(AbstractColor.PLAYER1, player1);
 		}
 	}
 
-	@Test
-	public void testGetFillableSegments() {
-		DrawFilledPolyRegion region = new DrawFilledPolyRegion(
-				getUShapePolyLine(), AbstractColor.PLAYER1);
-		List<List<Point>> fillableSegments = region.getFillableSegments(map);
-		assertEquals(1, fillableSegments.size());
-		List<Point> segment = fillableSegments.get(0);
-		assertEquals(4, segment.size());
-
-		assertEquals(10, segment.get(0).x);
-		assertEquals(50, segment.get(0).y);
-
-		assertEquals(10, segment.get(1).x);
-		assertEquals(80, segment.get(1).y);
-
-		assertEquals(40, segment.get(2).x);
-		assertEquals(80, segment.get(2).y);
-
-		assertEquals(40, segment.get(3).x);
-		assertEquals(50, segment.get(3).y);
-
-	}
-	
 	@Test
 	public void testApplyUShaped() {
 		DrawFilledPolyRegion region = new DrawFilledPolyRegion(
 				getUShapePolyLine(), AbstractColor.PLAYER1);
 		region.apply(map);
 		
-		assertEquals(AbstractColor.BLANK, map.getColor(75, 25));
-		assertEquals(AbstractColor.BLANK, map.getColor(75, 75));
+		Polygon blob = map.getBlob(AbstractColor.PLAYER1);
+
+		assertFalse(blob.contains(new Point(75,25)));
+		assertFalse(blob.contains(new Point(75,75)));
 		
-		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 25));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 75));
+		assertTrue(blob.contains(new Point(25,25)));
+		assertTrue(blob.contains(new Point(25,75)));
+		
+
 
 	}
 
@@ -79,11 +69,14 @@ public class TestDrawFilledPolyRegion {
 				getSlightWedgePolyLine(), AbstractColor.PLAYER1);
 		region.apply(map);
 		
-		assertEquals(AbstractColor.BLANK, map.getColor(75, 25));
-		assertEquals(AbstractColor.BLANK, map.getColor(75, 75));
 		
-		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 25));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 75));
+		Polygon blob = map.getBlob(AbstractColor.PLAYER1);
+		
+		assertFalse(blob.contains(new Point(75,25)));
+		assertFalse(blob.contains(new Point(75,75)));
+		
+		assertTrue(blob.contains(new Point(25,25)));
+		assertTrue(blob.contains(new Point(25,75)));
 	}
 
 	
@@ -95,17 +88,20 @@ public class TestDrawFilledPolyRegion {
 		polyLine.add(new Point(40, 10));
 		return polyLine;
 	}
+	
 	@Test
 	public void testApply45WedgeShaped() {
 		DrawFilledPolyRegion region = new DrawFilledPolyRegion(
 				get45WedgePolyLine(), AbstractColor.PLAYER1);
 		region.apply(map);
+		Polygon blob = map.getBlob(AbstractColor.PLAYER1);
 		
-		assertEquals(AbstractColor.BLANK, map.getColor(75, 25));
-		assertEquals(AbstractColor.BLANK, map.getColor(75, 75));
+		assertFalse(blob.contains(new Point(75,25)));
+		assertFalse(blob.contains(new Point(75,75)));
 		
-		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 25));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 55));
+		assertTrue(blob.contains(new Point(25,25)));
+		assertTrue(blob.contains(new Point(25,55)));
+
 	}
 
 	
@@ -124,16 +120,19 @@ public class TestDrawFilledPolyRegion {
 				getBackwardsCPolyLine(), AbstractColor.PLAYER1);
 		region.apply(map);
 		
-		assertEquals(AbstractColor.BLANK, map.getColor(25, 75));
-		assertEquals(AbstractColor.BLANK, map.getColor(75, 75));
-		assertEquals(AbstractColor.BLANK, map.getColor(80, 60));
+		Polygon blob = map.getBlob(AbstractColor.PLAYER1);
+		
+		assertFalse(blob.contains(new Point(25,75)));
+		assertFalse(blob.contains(new Point(75,75)));
+		assertFalse(blob.contains(new Point(80,60)));
 
-		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 25));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(55, 35));
+		assertTrue(blob.contains(new Point(25,25)));
+		assertTrue(blob.contains(new Point(55,35)));
+		
 		
 		for(int x = 0; x <= 80; x++){
 			for(int y = 20; y <= 40; y++){
-				assertEquals("wrong color at (x,y) = ("+ x +","+y+")", AbstractColor.PLAYER1, map.getColor(x, y));				
+				assertTrue("wrong color at (x,y) = ("+ x +","+y+")", blob.contains(new Point(x,y)));
 			}				
 		}
 	}
@@ -148,41 +147,41 @@ public class TestDrawFilledPolyRegion {
 		return polyLine;
 	}
 	
-	@Test
-	public void testApplyThinCrack() {
-		DrawFilledPolyRegion region = new DrawFilledPolyRegion(
-				getThinCrackPolyLine(), AbstractColor.PLAYER1);
-		region.apply(map);
-		
-		assertEquals(AbstractColor.BLANK, map.getColor(75, 75));
-		assertEquals(AbstractColor.BLANK, map.getColor(75, 25));
-		assertEquals(AbstractColor.BLANK, map.getColor(35, 50));
-		
-		assertEquals(AbstractColor.PLAYER1, map.getColor(35, 51));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(35, 49));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(29, 51));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(29, 49));		
-		assertEquals(AbstractColor.PLAYER1, map.getColor(30, 51));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(30, 49));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(31, 51));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(31, 49));
-
-
-		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 75));
-		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 25));
-		
-	}
-
-	
-	private List<Point> getThinCrackPolyLine() {
-		List<Point> polyLine = new ArrayList<>();
-		polyLine.add(new Point(20, 20));
-		polyLine.add(new Point(20, 80));
-		polyLine.add(new Point(40, 80));
-		polyLine.add(new Point(40, 51));
-		polyLine.add(new Point(30, 51));		
-		polyLine.add(new Point(30, 20));
-		return polyLine;
-	}
+//	@Test
+//	public void testApplyThinCrack() {
+//		DrawFilledPolyRegion region = new DrawFilledPolyRegion(
+//				getThinCrackPolyLine(), AbstractColor.PLAYER1);
+//		region.apply(map);
+//		
+//		assertEquals(AbstractColor.BLANK, map.getColor(75, 75));
+//		assertEquals(AbstractColor.BLANK, map.getColor(75, 25));
+//		assertEquals(AbstractColor.BLANK, map.getColor(35, 50));
+//		
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(35, 51));
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(35, 49));
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(29, 51));
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(29, 49));		
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(30, 51));
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(30, 49));
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(31, 51));
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(31, 49));
+//
+//
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 75));
+//		assertEquals(AbstractColor.PLAYER1, map.getColor(25, 25));
+//		
+//	}
+//
+//	
+//	private List<Point> getThinCrackPolyLine() {
+//		List<Point> polyLine = new ArrayList<>();
+//		polyLine.add(new Point(20, 20));
+//		polyLine.add(new Point(20, 80));
+//		polyLine.add(new Point(40, 80));
+//		polyLine.add(new Point(40, 51));
+//		polyLine.add(new Point(30, 51));		
+//		polyLine.add(new Point(30, 20));
+//		return polyLine;
+//	}
 	
 }

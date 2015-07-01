@@ -25,7 +25,7 @@ public class Polygon extends Polyline {
 		interior = Collections.unmodifiableSet(getInterior(this, map));
 	}
 	
-	public boolean isInside(Point p){
+	public boolean contains(Point p){
 		return interior.contains(p);
 	}
 	
