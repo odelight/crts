@@ -2,7 +2,7 @@ package gotox.crts.view;
 
 import gotox.crts.model.AbstractColor;
 import gotox.crts.model.ImmutableMap;
-import gotox.crts.model.Polygon;
+import gotox.crts.model.CrtsPolygon;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -47,8 +47,8 @@ public class MapDisplay extends JPanel implements RedrawListener {
 
 	public void draw() {
 		clearImage();
-		Map<AbstractColor, Polygon> blobMap = map.getBlobMap();
-		for (Map.Entry<AbstractColor, Polygon> e : blobMap.entrySet()) {
+		Map<AbstractColor, CrtsPolygon> blobMap = map.getBlobMap();
+		for (Map.Entry<AbstractColor, CrtsPolygon> e : blobMap.entrySet()) {
 			drawPolygon(e.getKey(), e.getValue());
 		}
 	}
@@ -62,7 +62,7 @@ public class MapDisplay extends JPanel implements RedrawListener {
 		}
 	}
 
-	public void drawPolygon(AbstractColor ac, Polygon paul) {
+	public void drawPolygon(AbstractColor ac, CrtsPolygon paul) {
 		Iterable<Point> interior = paul.getInterior();
 		for (Point p : interior) {
 			image.setRGB(p.x, p.y, colorModel.get(ac).getRGB());

@@ -8,13 +8,13 @@ import java.util.Map;
 
 public class MapModel {	
 	private final Dimension mapSize;
-	private final Map<AbstractColor, Polygon> blobs;
+	private final Map<AbstractColor, CrtsPolygon> blobs;
 	public MapModel(Dimension d){
 		mapSize = new Dimension(d.width,d.height);
 		blobs = new HashMap<>();
 	}
 	
-	public void putBlob(AbstractColor c, Polygon p){
+	public void putBlob(AbstractColor c, CrtsPolygon p){
 		blobs.put(c, p);
 	}
 	/**
@@ -22,11 +22,11 @@ public class MapModel {
 	 * @param c
 	 * @return
 	 */
-	public Polygon getBlob(AbstractColor c){
+	public CrtsPolygon getBlob(AbstractColor c){
 		return blobs.get(c);
 	}
 	
-	public Map<AbstractColor, Polygon> getBlobMap(){
+	public Map<AbstractColor, CrtsPolygon> getBlobMap(){
 		return blobs;
 	}
 	

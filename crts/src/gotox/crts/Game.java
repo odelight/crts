@@ -18,7 +18,7 @@ import gotox.crts.controller.Player;
 import gotox.crts.model.AbstractColor;
 import gotox.crts.model.ImmutableMap;
 import gotox.crts.model.MapModel;
-import gotox.crts.model.Polygon;
+import gotox.crts.model.CrtsPolygon;
 import gotox.crts.networking.Network;
 import gotox.crts.view.MapDisplay;
 
@@ -80,7 +80,7 @@ public class Game extends JFrame {
 						new Point(cornerSize,cornerSize),
 						new Point(0,cornerSize),
 						new Point(0,0)});
-		Polygon player1 = new Polygon(player1Blob, map);
+		CrtsPolygon player1 = new CrtsPolygon(player1Blob, map);
 		map.putBlob(AbstractColor.PLAYER1, player1);
 		}
 		{
@@ -90,7 +90,7 @@ public class Game extends JFrame {
 						new Point(width - cornerSize,height - cornerSize),
 						new Point(width-1,height - cornerSize),
 						new Point(width-1,height-1)});
-		Polygon player2 = new Polygon(player2Blob, map);
+		CrtsPolygon player2 = new CrtsPolygon(player2Blob, map);
 		map.putBlob(AbstractColor.PLAYER2, player2);
 		}
 //		for(int i = 0; i < cornerSize; i++){

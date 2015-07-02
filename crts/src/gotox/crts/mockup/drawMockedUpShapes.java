@@ -33,10 +33,10 @@ public class drawMockedUpShapes {
 	}
 
 	public Action getDribbleIssueAction() {
-//		return new DrawFilledPolyRegion(dribbleIssuePolyLine(),
-//				AbstractColor.PLAYER1);
-		return new DrawFilledPolyRegion(simpleDiamondPolyLine(),
-		AbstractColor.PLAYER1);	
+		return new DrawFilledPolyRegion(dribbleIssuePolyLine(),
+				AbstractColor.PLAYER1);
+//		return new DrawFilledPolyRegion(simpleDiamondPolyLine(),
+//		AbstractColor.PLAYER1);	
 	}
 	
 	

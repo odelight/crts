@@ -1,6 +1,7 @@
 package gotox.crts.model;
 
 import gotox.crts.GeometryUtils;
+import gotox.crts.Intersection;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -17,27 +18,27 @@ public class Polyline {
 		}
 		for (Point vert : vertices) {
 			if (!map.isValidPoint(vert)) {
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("Illegal vert:" + vert);
 			}
 		}
 		this.vertices = Collections.unmodifiableList(vertices);
 	}
 	
-	public List<Point> intersectsLine(Line l) {
+	public List<Intersection> intersectsLine(Line l) {
 		return intersectsLine(l.getStart(), l.getEnd());
 	}
 
-	public List<Point> intersectsLine(Point lineStart, Point lineEnd) {
+	public List<Intersection> intersectsLine(Point lineStart, Point lineEnd) {
 		Iterator<Point> vertsIterator = vertices.iterator();
 		Point edgeStart;
 		Point edgeEnd = vertsIterator.next();
-		List<Point> ret = new ArrayList<Point>();
+		List<Intersection> ret = new ArrayList<>();
 		while (vertsIterator.hasNext()) {
 			edgeStart = edgeEnd;
 			edgeEnd = vertsIterator.next();
-			Point intersection = GeometryUtils.lineIntersection(lineStart, lineEnd,
+			Intersection intersection = GeometryUtils.lineIntersection(lineStart, lineEnd,
 					edgeStart, edgeEnd);
-			if (intersection != null) {
+			if (intersection != null && !ret.contains(intersection)) {
 				ret.add(intersection);
 			}
 		}

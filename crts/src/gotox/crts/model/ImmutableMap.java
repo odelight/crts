@@ -20,11 +20,11 @@ public class ImmutableMap {
 		innerMap = m;
 	}
 
-	public Polygon getBlob(AbstractColor c){
+	public CrtsPolygon getBlob(AbstractColor c){
 		return innerMap.getBlob(c);
 	}
 	
-	public Map<AbstractColor, Polygon> getBlobMap(){
+	public Map<AbstractColor, CrtsPolygon> getBlobMap(){
 		return Collections.unmodifiableMap(innerMap.getBlobMap());
 	}
 

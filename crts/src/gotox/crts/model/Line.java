@@ -33,5 +33,13 @@ public class Line {
 		}
 		
 	}
+	/**
+	 * Assumes p1, and p2 lie on this line. 
+	 * Returns true if p1 is closer to start then p2.
+	 * @return
+	 */
+	public boolean checkOrdered(Point p1, Point p2){
+		return start.distanceSq(p1) <= start.distanceSq(p2);
+	}
 
 }

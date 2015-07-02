@@ -10,7 +10,7 @@ import java.util.List;
 
 import gotox.crts.model.AbstractColor;
 import gotox.crts.model.MapModel;
-import gotox.crts.model.Polygon;
+import gotox.crts.model.CrtsPolygon;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +31,7 @@ public class TestDrawFilledPolyRegion {
 						new Point(cornerSize,cornerSize),
 						new Point(0,cornerSize),
 						new Point(0,0)});
-		Polygon player1 = new Polygon(player1Blob, map);
+		CrtsPolygon player1 = new CrtsPolygon(player1Blob, map);
 		map.putBlob(AbstractColor.PLAYER1, player1);
 		}
 	}
@@ -42,7 +42,7 @@ public class TestDrawFilledPolyRegion {
 				getUShapePolyLine(), AbstractColor.PLAYER1);
 		region.apply(map);
 		
-		Polygon blob = map.getBlob(AbstractColor.PLAYER1);
+		CrtsPolygon blob = map.getBlob(AbstractColor.PLAYER1);
 
 		assertFalse(blob.contains(new Point(75,25)));
 		assertFalse(blob.contains(new Point(75,75)));
@@ -70,7 +70,7 @@ public class TestDrawFilledPolyRegion {
 		region.apply(map);
 		
 		
-		Polygon blob = map.getBlob(AbstractColor.PLAYER1);
+		CrtsPolygon blob = map.getBlob(AbstractColor.PLAYER1);
 		
 		assertFalse(blob.contains(new Point(75,25)));
 		assertFalse(blob.contains(new Point(75,75)));
@@ -94,7 +94,7 @@ public class TestDrawFilledPolyRegion {
 		DrawFilledPolyRegion region = new DrawFilledPolyRegion(
 				get45WedgePolyLine(), AbstractColor.PLAYER1);
 		region.apply(map);
-		Polygon blob = map.getBlob(AbstractColor.PLAYER1);
+		CrtsPolygon blob = map.getBlob(AbstractColor.PLAYER1);
 		
 		assertFalse(blob.contains(new Point(75,25)));
 		assertFalse(blob.contains(new Point(75,75)));
@@ -120,7 +120,7 @@ public class TestDrawFilledPolyRegion {
 				getBackwardsCPolyLine(), AbstractColor.PLAYER1);
 		region.apply(map);
 		
-		Polygon blob = map.getBlob(AbstractColor.PLAYER1);
+		CrtsPolygon blob = map.getBlob(AbstractColor.PLAYER1);
 		
 		assertFalse(blob.contains(new Point(25,75)));
 		assertFalse(blob.contains(new Point(75,75)));
@@ -130,8 +130,8 @@ public class TestDrawFilledPolyRegion {
 		assertTrue(blob.contains(new Point(55,35)));
 		
 		
-		for(int x = 0; x <= 80; x++){
-			for(int y = 20; y <= 40; y++){
+		for(int x = 0; x <= 79; x++){
+			for(int y = 20; y <= 39; y++){
 				assertTrue("wrong color at (x,y) = ("+ x +","+y+")", blob.contains(new Point(x,y)));
 			}				
 		}

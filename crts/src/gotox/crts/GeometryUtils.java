@@ -4,6 +4,7 @@ import gotox.crts.model.Line;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -61,82 +62,81 @@ public class GeometryUtils {
 
 	}
 
-	public static Point lineIntersection(Point lineAStart, Point lineAEnd,
-			Point lineBStart, Point lineBEnd) {
-		double tDenominator = tDenominator(lineAStart, lineAEnd, lineBStart, lineBEnd);
+	public static Intersection lineIntersection(Point p1, Point p2,
+			Point p3, Point p4) {
+		double tDenominator = tDenominator(p1, p2, p3, p4);
 		if (tDenominator == 0) {// lines are parallel
-			return GeometryUtils.lineIntersectionColinear(lineAStart, lineAEnd,
-					lineBStart, lineBEnd);
+			return GeometryUtils.lineIntersectionColinear(p1, p2,
+					p3, p4);
 		} else {
-			double tNumerator = tNumerator(lineAStart, lineBStart, lineBEnd);
+			double tNumerator = tNumerator(p1, p3, p4);
 			double t = tNumerator / tDenominator;
 			if (t > 1 || t < 0) {
 				return null;
 			} else {
-				double tPrime = tNumerator(lineBStart, lineAStart, lineAEnd) / tDenominator;
+				double tPrime =  tPrimeNumerator(p1, p2, p3) / tDenominator;
 				if (tPrime > 1 || tPrime < 0){
 					return null;					
 				}
 			}
-			double tPrime = tNumerator(lineAStart, lineBStart, lineBEnd);
-			int intersectX = (int) ((lineAEnd.x - lineAStart.x) * t + lineAStart.x);
-			int intersectY = (int) ((lineAEnd.y - lineAStart.y) * t + lineAStart.y);
-			return new Point(intersectX, intersectY);
+			int intersectX = (int) ((p2.x - p1.x) * t + p1.x);
+			int intersectY = (int) ((p2.y - p1.y) * t + p1.y);
+			return new Intersection(new Point(intersectX, intersectY));
 		}
 	}
 
-	private static int tNumerator(Point lineAStart, Point lineBStart,
-			Point lineBEnd) {
-		return (lineBEnd.x - lineBStart.x)
-				* (lineBStart.y - lineAStart.y) - (lineBEnd.y - lineBStart.y)
-				* (lineAStart.x - lineBStart.x);
-	}
-
-	private static int tDenominator(Point lineAStart, Point lineAEnd,
-			Point lineBStart, Point lineBEnd) {
-		return (lineBEnd.x - lineBStart.x)
-				* (lineAEnd.y - lineAStart.y) - (lineBEnd.y - lineBStart.y)
-				* (lineAEnd.x - lineAStart.x);
+	private static int tNumerator(Point p1, Point p3,
+			Point p4) {
+		return (p4.x - p3.x) * (p3.y - p1.y) - 
+			   (p3.x - p1.x) * (p4.y - p3.y);
 	}
 	
-	private static Point lineIntersectionColinear(Point lineAStart,
-			Point lineAEnd, Point lineBStart, Point lineBEnd) {
+	private static int tPrimeNumerator(Point p1, Point p2,
+			Point p3) {
+		return (p2.x - p1.x) * (p3.y - p1.y) - 
+			   (p3.x - p1.x) * (p2.y - p1.y);
+	}
+
+	private static int tDenominator(Point p1, Point p2,
+			Point p3, Point p4) {
+		return (p4.x - p3.x)
+				* (p2.y - p1.y) - (p4.y - p3.y)
+				* (p2.x - p1.x);
+	}
+	
+	private static Intersection lineIntersectionColinear(Point p1,
+			Point p2, Point p3, Point p4) {
 		// check if the lines are colinear by checking if segment between the
 		// lines starts is parallel to the lines.
-		if (((lineAStart.y - lineBStart.y) * (lineAEnd.x - lineAStart.x)) == ((lineAEnd.y - lineAStart.y) * (lineAStart.x - lineBStart.x))) {
+		if (((p1.y - p3.y) * (p2.x - p1.x)) == ((p2.y - p1.y) * (p1.x - p3.x))) {
 			// the segments lie on the same line. Just need to check for
 			// overlap.
-			if ((lineAEnd.x == lineAStart.x) && !(lineAEnd.y == lineAStart.y)) {
-				if (GeometryUtils.inInterval(lineBStart.y, lineBEnd.y,
-						lineAStart.y)) {
-					return lineAStart;
-				} else if (GeometryUtils.inInterval(lineBStart.y, lineBEnd.y,
-						lineAEnd.y)) {
-					return lineAEnd;
-				} else if (GeometryUtils.inInterval(lineAStart.y, lineAEnd.y,
-						lineBStart.y)) {
-					return lineBStart;
-				} else if (GeometryUtils.inInterval(lineAStart.y, lineAEnd.y,
-						lineBEnd.y)) {
-					return lineBEnd;
+			List<Point> points = Arrays.asList(new Point[]{p1,p2,p3,p4});
+			double distance = 0;
+			Point end1 = null;
+			Point end2 = null;
+			for(Point p : points){
+				for(Point q : points){
+					double newDistance = p.distance(q);
+					if(newDistance > distance){
+						end1 = p;
+						end2 = q;
+						distance = newDistance;
+					}
 				}
-				return null;
-			} else {
-				if (GeometryUtils.inInterval(lineBStart.x, lineBEnd.x,
-						lineAStart.x)) {
-					return lineAStart;
-				} else if (GeometryUtils.inInterval(lineBStart.x, lineBEnd.x,
-						lineAEnd.x)) {
-					return lineAEnd;
-				} else if (GeometryUtils.inInterval(lineAStart.x, lineAEnd.x,
-						lineBStart.x)) {
-					return lineBStart;
-				} else if (GeometryUtils.inInterval(lineAStart.x, lineAEnd.x,
-						lineBEnd.x)) {
-					return lineBEnd;
-				}
-				return null;
 			}
+			Point middle1 = null;
+			Point middle2 = null;
+			for(Point p : points){
+				if(!(p.equals(end1) && p.equals(end2))){
+					if(middle1 == null){
+						middle1 = p;
+					} else {
+						middle2 = p;
+					}
+				}
+			}
+			return new Intersection(middle1, middle2);
 		}
 		return null;
 	}
