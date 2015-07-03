@@ -61,12 +61,19 @@ public class MapDisplay extends JPanel implements RedrawListener {
 			}
 		}
 	}
-
+//
+//	private void drawPolygon(Graphics g, AbstractColor ac, CrtsPolygon p){
+//	}
+//	
 	public void drawPolygon(AbstractColor ac, CrtsPolygon paul) {
-		Iterable<Point> interior = paul.getInterior();
-		for (Point p : interior) {
-			image.setRGB(p.x, p.y, colorModel.get(ac).getRGB());
-		}
+		Graphics g = image.getGraphics();
+		g.setColor(colorModel.get(ac));
+		g.drawPolygon(paul.getPolygon());
+//		image.
+//		Iterable<Point> interior = paul.getInterior();
+//		for (Point p : interior) {
+//			image.setRGB(p.x, p.y, colorModel.get(ac).getRGB());
+//		}
 	}
 
 	@Override

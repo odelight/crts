@@ -8,9 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CrtsPolygon extends Polyline {
+public class CrtsPolygon extends CrtsPolyline {
 
-	private final Set<Point> interior;
 	private final Polygon innerPoly;
 
 	public CrtsPolygon(List<Point> vertices, MapModel map) {
@@ -29,28 +28,33 @@ public class CrtsPolygon extends Polyline {
 			ypoints[i] = vert.y;
 		}
 		innerPoly = new Polygon(xpoints, ypoints, n);
-		interior = Collections.unmodifiableSet(getInterior(innerPoly));
+//		interior = Collections.unmodifiableSet(getInterior(innerPoly));
 	}
 
 	public boolean contains(Point p) {
-		return interior.contains(p);
+		return innerPoly.contains(p);
+//		return interior.contains(p);
 	}
 
-	public Iterable<Point> getInterior() {
-		return interior;
-	}
+//	public Iterable<Point> getInterior() {
+//		return interior;
+//	}
 
-	private static Set<Point> getInterior(Polygon innerPoly) {
-		Set<Point> ret = new HashSet<>();
-		Rectangle r = innerPoly.getBounds();
-		for (int x = r.x; x <= r.x + r.width; x++) {
-			for (int y = r.y; y <= r.y + r.height; y++) {
-				Point p = new Point(x, y);
-				if (innerPoly.contains(p)) {
-					ret.add(p);
-				}
-			}
-		}
-		return ret;
+//	private static Set<Point> getInterior(Polygon innerPoly) {
+//		Set<Point> ret = new HashSet<>();
+//		Rectangle r = innerPoly.getBounds();
+//		for (int x = r.x; x <= r.x + r.width; x++) {
+//			for (int y = r.y; y <= r.y + r.height; y++) {
+//				Point p = new Point(x, y);
+//				if (innerPoly.contains(p)) {
+//					ret.add(p);
+//				}
+//			}
+//		}
+//		return ret;
+//	}
+	
+	public Polygon getPolygon(){
+		return innerPoly;
 	}
 }

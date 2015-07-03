@@ -86,9 +86,9 @@ public class Game extends JFrame {
 		{
 		List<Point> player2Blob = Arrays.asList(
 				new Point[]{new Point(width-1,height-1),
-						new Point(width - cornerSize,height-1),
-						new Point(width - cornerSize,height - cornerSize),
-						new Point(width-1,height - cornerSize),
+						new Point(width - cornerSize - 1,height-1),
+						new Point(width - cornerSize - 1,height - cornerSize - 1),
+						new Point(width-1,height - cornerSize - 1),
 						new Point(width-1,height-1)});
 		CrtsPolygon player2 = new CrtsPolygon(player2Blob, map);
 		map.putBlob(AbstractColor.PLAYER2, player2);

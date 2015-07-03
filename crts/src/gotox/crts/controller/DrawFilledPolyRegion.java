@@ -1,11 +1,12 @@
 package gotox.crts.controller;
 
+import gotox.crts.GeometryUtils;
 import gotox.crts.Intersection;
 import gotox.crts.model.AbstractColor;
+import gotox.crts.model.CrtsLine;
 import gotox.crts.model.CrtsPolygon;
-import gotox.crts.model.Line;
 import gotox.crts.model.MapModel;
-import gotox.crts.model.Polyline;
+import gotox.crts.model.CrtsPolyline;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -39,11 +40,11 @@ public class DrawFilledPolyRegion extends Action {
 		if (points.size() < 2) {
 			return;
 		}
-		Polyline draw = new Polyline(points, map);
+		CrtsPolyline draw = new CrtsPolyline(points, map);
 		CrtsPolygon blob = map.getBlob(drawColor);
 		boolean inside = blob.contains(points.get(0));
 		List<Point> viablePolyLine = new ArrayList<>();
-		for (Line l : draw.lineIterable()) {
+		for (CrtsLine l : draw.lineIterable()) {
 			if (!inside) {
 				viablePolyLine.add(l.getStart());
 			}
@@ -51,12 +52,23 @@ public class DrawFilledPolyRegion extends Action {
 			for (Intersection xing : xings) {
 				if (xing.isSingleIntersection()) {
 					viablePolyLine.add(xing.firstPoint());
+				} else {
+					if(l.getStart().distanceSq(xing.firstPoint()) < l.getStart().distanceSq(xing.secondPoint())){
+						viablePolyLine.add(xing.firstPoint());
+						viablePolyLine.add(xing.secondPoint());
+					} else {
+						viablePolyLine.add(xing.secondPoint());
+						viablePolyLine.add(xing.firstPoint());
+					}
+					
+				}
 					if (!inside) {
-						blob = annex(blob, viablePolyLine, map);
+						if(!GeometryUtils.selfIntersects(new CrtsPolyline(viablePolyLine, map))){							
+							blob = annex(blob, viablePolyLine, map);
+						}
 						viablePolyLine = new ArrayList<>();
 					}
 					inside = !inside;
-				}
 			}
 		}
 		map.putBlob(drawColor, blob);
@@ -69,7 +81,7 @@ public class DrawFilledPolyRegion extends Action {
 		Point additionEnd = addition.get(addition.size() - 1);
 		boolean preAddition = true;
 		boolean inAddition = false;
-		for (Line l : blob.lineIterable()) {
+		for (CrtsLine l : blob.lineIterable()) {
 			if (preAddition) {
 				newPolyPoints.add(l.getStart());
 			} else if (inAddition) {
@@ -77,14 +89,17 @@ public class DrawFilledPolyRegion extends Action {
 			} else {
 				newPolyPoints.add(l.getEnd());
 			}
-			if (l.contains(additionEnd) || l.contains(additionStart)) {
+			if ((l.contains(additionEnd) && (preAddition || inAddition)) || (l.contains(additionStart) && preAddition)) {
 				if (inAddition) {
 					inAddition = false;
 					newPolyPoints.add(l.getEnd());
 				} else {
 					if (l.contains(additionEnd)) {
-						if (l.checkOrdered(additionEnd, additionStart)) {
+						if ((!l.contains(additionStart)) || (l.checkOrdered(additionEnd, additionStart))) {
 							Collections.reverse(addition);
+							Point temp = additionEnd;
+							additionEnd = additionStart;
+							additionStart = temp;
 						}
 					}
 					newPolyPoints.addAll(addition);

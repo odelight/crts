@@ -9,10 +9,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class Polyline {
+public class CrtsPolyline {
 	private final List<Point> vertices;
 	
-	public Polyline(List<Point> vertices, MapModel map) {
+	public CrtsPolyline(List<Point> vertices, MapModel map) {
 		if (vertices.size() < 2) {
 			throw new IllegalArgumentException();
 		}
@@ -24,7 +24,7 @@ public class Polyline {
 		this.vertices = Collections.unmodifiableList(vertices);
 	}
 	
-	public List<Intersection> intersectsLine(Line l) {
+	public List<Intersection> intersectsLine(CrtsLine l) {
 		return intersectsLine(l.getStart(), l.getEnd());
 	}
 
@@ -50,11 +50,11 @@ public class Polyline {
 		return vertices;
 	}
 	
-	public Iterable<Line> lineIterable(){
-		return new Iterable<Line>(){
+	public Iterable<CrtsLine> lineIterable(){
+		return new Iterable<CrtsLine>(){
 			@Override
-			public Iterator<Line> iterator() {
-				return new Iterator<Line>(){
+			public Iterator<CrtsLine> iterator() {
+				return new Iterator<CrtsLine>(){
 					private final Iterator<Point> pointIter = pointIterable().iterator();
 					private Point leadingPoint = pointIter.next();
 					private Point trailingPoint;
@@ -64,10 +64,10 @@ public class Polyline {
 					}
 
 					@Override
-					public Line next() {
+					public CrtsLine next() {
 						trailingPoint = leadingPoint;
 						leadingPoint = pointIter.next();
-						return new Line(trailingPoint, leadingPoint);
+						return new CrtsLine(trailingPoint, leadingPoint);
 					}
 
 					@Override
