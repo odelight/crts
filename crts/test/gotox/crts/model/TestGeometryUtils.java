@@ -122,5 +122,15 @@ public class TestGeometryUtils {
 		assertTrue(p2.equals(intersection.firstPoint()));	
 		assertTrue(null == intersection.secondPoint());	
 	}
-	
+
+	@Test
+	public void testLinesIntersect11(){
+		Point p1 = new Point(235,118);
+		Point p2 = new Point(240,118);
+		Point p3 = new Point(245,118);
+		Point p4 = new Point(255,118);
+		
+		Intersection intersection = GeometryUtils.lineIntersection(p1, p2, p3, p4);
+		assertTrue(null == intersection);	
+	}
 }

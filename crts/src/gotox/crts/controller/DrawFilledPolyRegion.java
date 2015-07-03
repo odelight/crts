@@ -21,14 +21,16 @@ public class DrawFilledPolyRegion extends Action {
 	private final AbstractColor drawColor;
 
 	public DrawFilledPolyRegion(List<Point> points, AbstractColor c) {
-		Iterator<Point> pointIter = points.iterator();
-		Point lastPoint = pointIter.next();
-		while (pointIter.hasNext()) {
-			Point p = pointIter.next();
-			if (p.equals(lastPoint)) {
-				pointIter.remove();
-			} else {
-				lastPoint = p;
+		if (!points.isEmpty()) {
+			Iterator<Point> pointIter = points.iterator();
+			Point lastPoint = pointIter.next();
+			while (pointIter.hasNext()) {
+				Point p = pointIter.next();
+				if (p.equals(lastPoint)) {
+					pointIter.remove();
+				} else {
+					lastPoint = p;
+				}
 			}
 		}
 		this.points = points;
@@ -38,6 +40,7 @@ public class DrawFilledPolyRegion extends Action {
 	@Override
 	public void apply(MapModel map) {
 		if (points.size() < 2) {
+			System.out.println("Cannot draw single point.");
 			return;
 		}
 		CrtsPolyline draw = new CrtsPolyline(points, map);
@@ -53,22 +56,27 @@ public class DrawFilledPolyRegion extends Action {
 				if (xing.isSingleIntersection()) {
 					viablePolyLine.add(xing.firstPoint());
 				} else {
-					if(l.getStart().distanceSq(xing.firstPoint()) < l.getStart().distanceSq(xing.secondPoint())){
+					if (l.getStart().distanceSq(xing.firstPoint()) < l
+							.getStart().distanceSq(xing.secondPoint())) {
 						viablePolyLine.add(xing.firstPoint());
 						viablePolyLine.add(xing.secondPoint());
 					} else {
 						viablePolyLine.add(xing.secondPoint());
 						viablePolyLine.add(xing.firstPoint());
 					}
-					
+
 				}
-					if (!inside) {
-						if(!GeometryUtils.selfIntersects(new CrtsPolyline(viablePolyLine, map))){							
-							blob = annex(blob, viablePolyLine, map);
-						}
-						viablePolyLine = new ArrayList<>();
+				if (!inside) {
+					if (!GeometryUtils.selfIntersects(new CrtsPolyline(
+							viablePolyLine, map))) {
+						System.out.println("Attempting to draw viable figure");
+						blob = annex(blob, viablePolyLine, map);
+					} else {
+						System.out.println("Cannot draw self intersecting figure");
 					}
-					inside = !inside;
+					viablePolyLine = new ArrayList<>();
+				}
+				inside = !inside;
 			}
 		}
 		map.putBlob(drawColor, blob);
@@ -89,13 +97,15 @@ public class DrawFilledPolyRegion extends Action {
 			} else {
 				newPolyPoints.add(l.getEnd());
 			}
-			if ((l.contains(additionEnd) && (preAddition || inAddition)) || (l.contains(additionStart) && preAddition)) {
+			if ((l.contains(additionEnd) && (preAddition || inAddition))
+					|| (l.contains(additionStart) && preAddition)) {
 				if (inAddition) {
 					inAddition = false;
 					newPolyPoints.add(l.getEnd());
 				} else {
 					if (l.contains(additionEnd)) {
-						if ((!l.contains(additionStart)) || (l.checkOrdered(additionEnd, additionStart))) {
+						if ((!l.contains(additionStart))
+								|| (l.checkOrdered(additionEnd, additionStart))) {
 							Collections.reverse(addition);
 							Point temp = additionEnd;
 							additionEnd = additionStart;

@@ -26,8 +26,8 @@ public class CrtsLine {
 			double t = ((double)(p.x - start.x)) / dx;
 			double predictedY = t * dy + start.y;
 			if (Math.abs(predictedY - p.y) <= 1) {
-				if ((p.y >= start.y && p.y <= end.y) || (p.y <= start.y
-						&& p.y >= end.y)) {
+				if ((p.x >= start.x && p.x <= end.x) || (p.x <= start.x
+						&& p.x >= end.x)) {
 					return true;
 				}
 			}
@@ -38,8 +38,8 @@ public class CrtsLine {
 			double t = ((double)(p.y - start.y)) / dy;
 			double predictedX = t * dx + start.x;
 			if (Math.abs(predictedX - p.x) <= 1) {
-				if ((p.x >= start.x && p.x <= end.x) || (p.x <= start.x
-						&& p.x >= end.x)) {
+				if ((p.y >= start.y && p.y <= end.y) || (p.y <= start.y
+						&& p.y >= end.y)) {
 					return true;
 				}
 			}

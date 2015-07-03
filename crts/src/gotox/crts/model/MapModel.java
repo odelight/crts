@@ -35,6 +35,9 @@ public class MapModel {
 	}
 	
 	public boolean isValidPoint(Point p) {
+		if(p == null){
+			return false;
+		}
 		return ((0 <= p.x) && (p.x < mapSize.width) && (0 <= p.y) && (p.y < mapSize.height));
 	}
 }
