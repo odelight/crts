@@ -21,6 +21,10 @@ public class DrawFilledPolyRegion extends Action {
 	private final AbstractColor drawColor;
 
 	public DrawFilledPolyRegion(List<Point> points, AbstractColor c) {
+		System.out.print("New draw created:");
+		for(Point p : points){
+			System.out.print("new Point(" + p.x + "," + p.y +"), ");
+		}
 		if (!points.isEmpty()) {
 			Iterator<Point> pointIter = points.iterator();
 			Point lastPoint = pointIter.next();

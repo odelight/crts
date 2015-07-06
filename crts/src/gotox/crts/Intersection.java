@@ -7,10 +7,17 @@ public class Intersection {
 	private final Point p1, p2;
 	
 	public Intersection(Point p){
+		if(p == null){
+			throw new NullPointerException();
+		}
 		p1 = p;
 		p2 = null;
 	}
+
 	public Intersection(Point p1, Point p2){
+		if(p1 == null || p2 == null){
+			throw new NullPointerException();
+		}
 		this.p1 = p1;
 		this.p2 = p2;
 	}

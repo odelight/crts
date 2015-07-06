@@ -10,6 +10,10 @@ import gotox.crts.model.MapModel;
  *
  */
 public abstract class Action implements Serializable , Comparable<Action> {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final long inputtedTime;
 	public abstract void apply(MapModel m);
 	public Action(){
@@ -17,8 +21,7 @@ public abstract class Action implements Serializable , Comparable<Action> {
 	}
 	@Override
 	public int compareTo(Action o) {
-		// TODO Auto-generated method stub
-		return sign(this.inputtedTime - o.inputtedTime);
+				return sign(this.inputtedTime - o.inputtedTime);
 	}
 	
 	private static int sign(long l){

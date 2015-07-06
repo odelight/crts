@@ -145,6 +145,9 @@ public class GeometryUtils {
 						}
 					}
 				}
+				if(middle1 == null && middle2 == null){
+					return new Intersection(end1, end2);
+				}
 				return new Intersection(middle1, middle2);
 			}
 		}

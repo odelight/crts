@@ -23,6 +23,22 @@ public class CrtsPolyline {
 		}
 		this.vertices = Collections.unmodifiableList(vertices);
 	}
+
+	public CrtsPolyline(List<Point> vertices, ImmutableMap map) {
+		if (vertices.size() < 2) {
+			throw new IllegalArgumentException();
+		}
+		for (Point vert : vertices) {
+			if (!map.isValidPoint(vert)) {
+				throw new IllegalArgumentException("Illegal vert:" + vert);
+			}
+		}
+		this.vertices = Collections.unmodifiableList(vertices);
+	}
+	
+	public List<Point> getPoints(){
+		return vertices;
+	}
 	
 	public List<Intersection> intersectsLine(CrtsLine l) {
 		return intersectsLine(l.getStart(), l.getEnd());

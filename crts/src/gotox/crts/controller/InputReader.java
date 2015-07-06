@@ -1,5 +1,7 @@
 package gotox.crts.controller;
 
+import gotox.crts.view.MapDisplay;
+
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,20 +20,23 @@ public class InputReader {
 	private final MouseMotionAdapter mouseMotionAdapter;
 	private final MouseAdapter mouseAdapter;
 
-	public InputReader(Player p) {
+	public InputReader(Player p, final MapDisplay display) {
 		player = p;
 		mouseMotionAdapter = new MouseMotionAdapter() {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				Point p = e.getPoint();
-					currentDrawPoints.add(p);
+				currentDrawPoints.add(p);
+				display.setTrail(currentDrawPoints);
 			}
 		};
 		mouseAdapter = new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				DrawFilledPolyRegion d = new DrawFilledPolyRegion(currentDrawPoints, player.getColor());
+				DrawFilledPolyRegion d = new DrawFilledPolyRegion(
+						currentDrawPoints, player.getColor());
 				currentDrawPoints = new ArrayList<>();
+				display.clearTrails();
 				queueAction(d);
 			}
 		};
