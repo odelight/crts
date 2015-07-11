@@ -36,4 +36,8 @@ public class ImmutableMap {
 	public Dimension getDimension(){
 		return innerMap.getDimension();
 	}
+	
+	public void makePointValid(Point p){
+		innerMap.makePointValid(p);
+	}
 }

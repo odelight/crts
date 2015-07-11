@@ -37,6 +37,9 @@ public class MapDisplay extends JPanel implements RedrawListener {
 	}
 
 	public void setTrail(List<Point> verts) {
+		for(Point p : verts){
+			map.makePointValid(p);
+		}
 		if (verts.size() > 2) {
 			trail = new CrtsPolyline(verts, map);
 			requestRedraw();
@@ -83,8 +86,8 @@ public class MapDisplay extends JPanel implements RedrawListener {
 	public void drawPolygon(AbstractColor ac, CrtsPolygon paul) {
 		Graphics g = image.getGraphics();
 		g.setColor(colorModel.get(ac));
-		// g.fillPolygon(paul.getPolygon());
-		g.drawPolygon(paul.getPolygon());
+		 g.fillPolygon(paul.getPolygon());
+//		g.drawPolygon(paul.getPolygon());
 	}
 
 	public void drawPolyline(Color c, CrtsPolyline line) {

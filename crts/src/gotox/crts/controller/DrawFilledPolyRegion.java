@@ -47,6 +47,9 @@ public class DrawFilledPolyRegion extends Action {
 			System.out.println("Cannot draw single point.");
 			return;
 		}
+		for(Point p : points){
+			map.makePointValid(p);
+		}
 		CrtsPolyline draw = new CrtsPolyline(points, map);
 		CrtsPolygon blob = map.getBlob(drawColor);
 		boolean inside = blob.contains(points.get(0));
@@ -117,7 +120,7 @@ public class DrawFilledPolyRegion extends Action {
 						}
 					}
 					newPolyPoints.addAll(addition);
-					preAddition = false;
+					preAddition = false;	
 					if (l.contains(additionEnd) && l.contains(additionStart)) {
 						newPolyPoints.add(l.getEnd());
 					} else {

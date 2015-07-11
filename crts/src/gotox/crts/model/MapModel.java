@@ -40,4 +40,18 @@ public class MapModel {
 		}
 		return ((0 <= p.x) && (p.x < mapSize.width) && (0 <= p.y) && (p.y < mapSize.height));
 	}
+	
+	public void makePointValid(Point p){
+		if(p.x < 0){
+			p.x = 0;
+		} else if(p.x >= mapSize.width){
+			p.x = mapSize.width - 1;
+		}
+		
+		if(p.y < 0){
+			p.y = 0;
+		} else if (p.y >= mapSize.height){
+			p.y = mapSize.height - 1;
+		}
+	}
 }

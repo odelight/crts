@@ -113,6 +113,7 @@ public class Game extends JFrame {
 
 	private void gameLoop() {
 		isRunning = true;
+		try{
 		while (isRunning) {
 			List<Action> inputs = ir.getActions();
 			n.queueActions(inputs);
@@ -125,7 +126,9 @@ public class Game extends JFrame {
 				this.repaint();
 			}
 		}
-		cleanUp();
+		} finally {
+			cleanUp();			
+		}
 	}
 
 	private void cleanUp() {
